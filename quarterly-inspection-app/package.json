@@ -1,0 +1,16 @@
+{
+  "name": "quarterly-inspection-app",
+  "version": "1.0.0",
+  "description": "Hosted quarterly inspection form that syncs Inventory and Quarterly boards in monday.com",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch server/index.js",
+    "start": "node server/index.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.5.0",
+    "express": "^4.19.2",
+    "helmet": "^7.2.0",
+    "morgan": "^1.10.0"
+  }
+}

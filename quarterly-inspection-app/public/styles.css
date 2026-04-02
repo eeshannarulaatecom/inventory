@@ -1,0 +1,241 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap");
+
+:root {
+  --bg-top: #f8f4e8;
+  --bg-bottom: #d2efe5;
+  --surface: #ffffffcc;
+  --line: #d8e1e7;
+  --ink: #102a43;
+  --ink-soft: #35506b;
+  --accent: #006f54;
+  --accent-strong: #004f3c;
+  --danger: #b00020;
+  --danger-soft: #fde9ed;
+  --success-soft: #e8f8ef;
+  --info-soft: #edf5ff;
+  --radius: 14px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+  min-height: 100vh;
+  background: linear-gradient(120deg, var(--bg-top), var(--bg-bottom));
+}
+
+.layout {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 28px 18px 40px;
+}
+
+.hero h1 {
+  font-family: "Space Grotesk", "Trebuchet MS", sans-serif;
+  margin: 6px 0 10px;
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+}
+
+.hero-kicker {
+  margin: 0;
+  color: var(--accent-strong);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+}
+
+.hero-text {
+  margin: 0;
+  color: var(--ink-soft);
+  max-width: 880px;
+  line-height: 1.45;
+}
+
+.panel {
+  margin-top: 18px;
+  background: var(--surface);
+  border: 1px solid #ffffff;
+  border-radius: var(--radius);
+  box-shadow: 0 16px 40px #0a2f5224;
+  backdrop-filter: blur(5px);
+  padding: 16px;
+}
+
+.top-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.top-controls label {
+  font-weight: 600;
+}
+
+input[type="date"],
+select,
+textarea {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  font-family: inherit;
+  font-size: 0.95rem;
+  padding: 8px 10px;
+}
+
+input[type="date"]:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid #1d8f6f55;
+  border-color: #1d8f6f;
+}
+
+textarea {
+  min-width: 220px;
+  resize: vertical;
+}
+
+.button-primary,
+.button-secondary {
+  border: 0;
+  border-radius: 11px;
+  cursor: pointer;
+  font-family: "Space Grotesk", "Trebuchet MS", sans-serif;
+  font-weight: 600;
+  transition: transform 120ms ease, opacity 120ms ease;
+  padding: 10px 14px;
+}
+
+.button-primary {
+  color: #fff;
+  background: linear-gradient(180deg, #0a7f5f, #00543e);
+}
+
+.button-secondary {
+  color: #083225;
+  background: #d6f2e8;
+}
+
+.button-primary:hover,
+.button-secondary:hover {
+  transform: translateY(-1px);
+}
+
+.button-primary:disabled,
+.button-secondary:disabled {
+  opacity: 0.55;
+  transform: none;
+  cursor: not-allowed;
+}
+
+.rule-line {
+  margin: 12px 0;
+  color: #2f4f63;
+  font-size: 0.93rem;
+}
+
+.banner {
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  border: 1px solid transparent;
+  font-weight: 500;
+}
+
+.banner-info {
+  background: var(--info-soft);
+  border-color: #bfd8fd;
+}
+
+.banner-success {
+  background: var(--success-soft);
+  border-color: #9fd3af;
+}
+
+.banner-error {
+  background: var(--danger-soft);
+  border-color: #f0b1bf;
+  color: var(--danger);
+}
+
+.hidden {
+  display: none;
+}
+
+.table-shell {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1050px;
+}
+
+thead th {
+  background: #f2f8fb;
+  font-family: "Space Grotesk", "Trebuchet MS", sans-serif;
+  font-size: 0.84rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  text-align: left;
+  color: #214259;
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--line);
+  padding: 10px;
+  vertical-align: top;
+}
+
+tbody tr:nth-child(even) {
+  background: #fbfefd;
+}
+
+.row-missing {
+  background: #fff1f5 !important;
+}
+
+.placeholder-cell {
+  text-align: center;
+  color: #516f83;
+  padding: 24px 12px;
+}
+
+.pass-fail-select {
+  width: 100%;
+  min-width: 110px;
+}
+
+.comments-input {
+  width: 100%;
+}
+
+@media (max-width: 920px) {
+  .panel {
+    padding: 12px;
+  }
+
+  .top-controls {
+    gap: 10px;
+  }
+
+  .button-primary,
+  .button-secondary {
+    width: 100%;
+  }
+
+  input[type="date"] {
+    width: 100%;
+  }
+}

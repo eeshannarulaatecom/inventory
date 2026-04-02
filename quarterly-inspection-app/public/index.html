@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quarterly Equipment Check</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="layout">
+      <header class="hero">
+        <p class="hero-kicker">Inventory Safety Program</p>
+        <h1>Quarterly Equipment Check</h1>
+        <p class="hero-text">
+          This form pulls equipment details from your Inventory board and syncs results
+          into your Quarterly board. Inspectors only choose pass/fail and can add optional comments.
+        </p>
+      </header>
+
+      <section class="panel">
+        <form id="inspectionForm" novalidate>
+          <div class="top-controls">
+            <label for="checkDate">Check Date</label>
+            <input id="checkDate" name="checkDate" type="date" required />
+            <button id="refreshButton" type="button" class="button-secondary">
+              Refresh Equipment
+            </button>
+            <button id="submitButton" type="submit" class="button-primary">
+              Submit Quarterly Check
+            </button>
+          </div>
+
+          <p class="rule-line">
+            Required: every equipment row must be marked
+            <strong id="passLabel">Pass</strong> or <strong id="failLabel">Fail</strong>.
+          </p>
+
+          <div id="banner" class="banner hidden" role="status" aria-live="polite"></div>
+
+          <div class="table-shell">
+            <table>
+              <thead>
+                <tr>
+                  <th>Serial Number</th>
+                  <th>Equipment ID</th>
+                  <th>Make</th>
+                  <th>Model Number</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>Pass/Fail</th>
+                  <th>Comments</th>
+                </tr>
+              </thead>
+              <tbody id="equipmentBody">
+                <tr>
+                  <td colspan="8" class="placeholder-cell">Loading equipment...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
