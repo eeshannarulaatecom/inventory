@@ -44,7 +44,6 @@ Inventory board must map:
 - Make
 - Model Number
 - Type
-- Status
 
 Quarterly board must map:
 

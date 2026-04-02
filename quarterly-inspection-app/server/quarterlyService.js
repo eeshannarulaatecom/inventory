@@ -208,8 +208,7 @@ export async function fetchInventoryEquipment() {
         make: columnLookup[config.monday.inventoryColumns.make]?.text || "",
         modelNumber:
           columnLookup[config.monday.inventoryColumns.modelNumber]?.text || "",
-        type: columnLookup[config.monday.inventoryColumns.type]?.text || "",
-        status: columnLookup[config.monday.inventoryColumns.status]?.text || ""
+        type: columnLookup[config.monday.inventoryColumns.type]?.text || ""
       };
     })
     .filter((item) => item.serialNumber)

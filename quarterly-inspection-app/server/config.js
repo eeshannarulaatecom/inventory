@@ -48,8 +48,7 @@ export const config = {
       equipmentId: readEnv("MONDAY_INVENTORY_EQUIPMENT_ID_COLUMN_ID"),
       make: readEnv("MONDAY_INVENTORY_MAKE_COLUMN_ID"),
       modelNumber: readEnv("MONDAY_INVENTORY_MODEL_COLUMN_ID"),
-      type: readEnv("MONDAY_INVENTORY_TYPE_COLUMN_ID"),
-      status: readEnv("MONDAY_INVENTORY_STATUS_COLUMN_ID")
+      type: readEnv("MONDAY_INVENTORY_TYPE_COLUMN_ID")
     },
     quarterlyColumns: {
       modelNumber: readEnv("MONDAY_QUARTERLY_MODEL_COLUMN_ID"),

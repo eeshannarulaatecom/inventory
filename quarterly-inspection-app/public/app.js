@@ -100,7 +100,7 @@ function renderEmptyRow(message) {
   elements.tableBody.innerHTML = "";
   const row = document.createElement("tr");
   const cell = document.createElement("td");
-  cell.colSpan = 8;
+  cell.colSpan = 7;
   cell.className = "placeholder-cell";
   cell.textContent = message;
   row.append(cell);
@@ -127,7 +127,6 @@ function renderEquipmentRows() {
     row.append(makeTextCell(item.make));
     row.append(makeTextCell(item.modelNumber));
     row.append(makeTextCell(item.type));
-    row.append(makeTextCell(item.status));
     row.append(makePassFailCell());
     row.append(makeCommentsCell());
 
