@@ -110,9 +110,8 @@ function renderTemplate() {
     table.innerHTML = `
       <thead>
         <tr>
-          <th style="width:42%">Check Item</th>
-          <th style="width:24%">Result</th>
-          <th style="width:34%">Comments</th>
+          <th style="width:64%">Check Item (Pass/Fail)</th>
+          <th style="width:36%">Comments</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -130,11 +129,8 @@ function renderTemplate() {
       const itemTitle = document.createElement("div");
       itemTitle.className = "item-title";
       itemTitle.textContent = item.label || item.id || "Checklist Item";
-      itemCell.append(itemTitle);
-      row.append(itemCell);
-
-      const resultCell = document.createElement("td");
-      resultCell.className = "result-cell";
+      const itemResultInline = document.createElement("div");
+      itemResultInline.className = "item-result-inline";
 
       const resultOptions = document.createElement("div");
       resultOptions.className = "result-options";
@@ -161,8 +157,9 @@ function renderTemplate() {
       failLabel.append(failInput, failText);
 
       resultOptions.append(passLabel, failLabel);
-      resultCell.append(resultOptions);
-      row.append(resultCell);
+      itemResultInline.append(resultOptions);
+      itemCell.append(itemTitle, itemResultInline);
+      row.append(itemCell);
 
       const commentCell = document.createElement("td");
       const commentsInput = document.createElement("textarea");

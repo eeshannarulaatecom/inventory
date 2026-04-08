@@ -188,7 +188,7 @@ textarea:focus {
 
 .checklist-table {
   width: 100%;
-  min-width: 820px;
+  min-width: 0;
   border-collapse: collapse;
 }
 
@@ -212,8 +212,8 @@ textarea:focus {
   font-weight: 600;
 }
 
-.result-cell {
-  min-width: 200px;
+.item-result-inline {
+  margin-top: 8px;
 }
 
 .result-options {
