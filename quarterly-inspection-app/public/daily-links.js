@@ -31,11 +31,17 @@ function safeText(value, fallback = "--") {
   return text || fallback;
 }
 
-function ensureQrGenerator() {
+function getQrGenerator() {
   if (window.QRCode && typeof window.QRCode.toDataURL === "function") {
     return window.QRCode;
   }
-  throw new Error("QR generator failed to load.");
+  return null;
+}
+
+function buildFallbackQrUrl(text, width = 180) {
+  const size = Math.max(64, Math.min(1024, Number(width) || 180));
+  const encoded = encodeURIComponent((text || "").toString());
+  return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encoded}&format=png&margin=10`;
 }
 
 function toSafeFileNamePart(value, fallback) {
@@ -62,10 +68,15 @@ function triggerDownload(dataUrl, fileName) {
   anchor.remove();
 }
 
-function generateQrDataUrl(text, width = 180) {
+function generateQrDataUrlFromLibrary(text, width = 180) {
   return new Promise((resolve, reject) => {
     try {
-      const qr = ensureQrGenerator();
+      const qr = getQrGenerator();
+      if (!qr) {
+        reject(new Error("QR generator library unavailable."));
+        return;
+      }
+
       qr.toDataURL(
         text,
         {
@@ -92,12 +103,23 @@ async function getQrDataUrl(url) {
   if (state.qrDataUrlByUrl.has(key)) {
     return state.qrDataUrlByUrl.get(key);
   }
-  const dataUrl = await generateQrDataUrl(key);
+  const dataUrl = await generateQrDataUrlFromLibrary(key);
   state.qrDataUrlByUrl.set(key, dataUrl);
   return dataUrl;
 }
 
 async function populateQrPreview(link, previewImage, previewStatus, downloadButton) {
+  const fallbackQrUrl = buildFallbackQrUrl(link.url, 180);
+
+  if (!getQrGenerator()) {
+    previewImage.src = fallbackQrUrl;
+    previewImage.classList.remove("hidden");
+    previewStatus.classList.add("hidden");
+    previewStatus.textContent = "";
+    downloadButton.disabled = false;
+    return;
+  }
+
   try {
     const dataUrl = await getQrDataUrl(link.url);
     previewImage.src = dataUrl;
@@ -106,12 +128,17 @@ async function populateQrPreview(link, previewImage, previewStatus, downloadButt
     previewStatus.textContent = "";
     downloadButton.disabled = false;
   } catch (error) {
-    previewStatus.classList.remove("hidden");
-    previewStatus.textContent = "QR unavailable";
-    downloadButton.disabled = true;
+    previewImage.src = fallbackQrUrl;
+    previewImage.classList.remove("hidden");
+    previewStatus.classList.add("hidden");
+    previewStatus.textContent = "";
+    downloadButton.disabled = false;
     if (!state.qrLoadErrorShown) {
       state.qrLoadErrorShown = true;
-      setBanner("error", `Unable to generate QR images: ${error.message}`);
+      setBanner(
+        "info",
+        `QR library unavailable, using fallback QR service instead. (${error.message})`
+      );
     }
   }
 }
@@ -122,7 +149,14 @@ async function downloadQr(link, button) {
   button.textContent = "Preparing...";
 
   try {
-    const dataUrl = await getQrDataUrl(link.url);
+    let dataUrl = buildFallbackQrUrl(link.url, 512);
+    if (getQrGenerator()) {
+      try {
+        dataUrl = await getQrDataUrl(link.url);
+      } catch (_error) {
+        dataUrl = buildFallbackQrUrl(link.url, 512);
+      }
+    }
     triggerDownload(dataUrl, qrFileName(link));
     setBanner("success", `Downloaded QR image for ${safeText(link.serialNumber)}.`);
   } catch (error) {
