@@ -319,6 +319,7 @@ textarea:focus {
   border-bottom: 1px solid var(--line);
   padding: 10px;
   text-align: left;
+  vertical-align: top;
 }
 
 .links-table th {
@@ -333,6 +334,25 @@ textarea:focus {
   font-family: "IBM Plex Mono", "Consolas", monospace;
   font-size: 0.8rem;
   color: #2a4d67;
+}
+
+.qr-preview {
+  width: 120px;
+  height: 120px;
+  border: 1px solid #c6d7e6;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.qr-status {
+  font-size: 0.78rem;
+  color: #4e687c;
+}
+
+.link-actions {
+  display: grid;
+  gap: 8px;
+  min-width: 130px;
 }
 
 @media (max-width: 980px) {

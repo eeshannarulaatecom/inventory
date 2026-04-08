@@ -5,7 +5,9 @@ const elements = {
 };
 
 const state = {
-  links: []
+  links: [],
+  qrDataUrlByUrl: new Map(),
+  qrLoadErrorShown: false
 };
 
 function setBanner(type, message) {
@@ -29,6 +31,108 @@ function safeText(value, fallback = "--") {
   return text || fallback;
 }
 
+function ensureQrGenerator() {
+  if (window.QRCode && typeof window.QRCode.toDataURL === "function") {
+    return window.QRCode;
+  }
+  throw new Error("QR generator failed to load.");
+}
+
+function toSafeFileNamePart(value, fallback) {
+  const text = (value || "").toString().trim().toLowerCase();
+  if (!text) {
+    return fallback;
+  }
+  return text.replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || fallback;
+}
+
+function qrFileName(link) {
+  const serial = toSafeFileNamePart(link.serialNumber, "");
+  const equipment = toSafeFileNamePart(link.equipmentId, "equipment");
+  const key = serial || equipment;
+  return `${key}-daily-qr.png`;
+}
+
+function triggerDownload(dataUrl, fileName) {
+  const anchor = document.createElement("a");
+  anchor.href = dataUrl;
+  anchor.download = fileName;
+  document.body.append(anchor);
+  anchor.click();
+  anchor.remove();
+}
+
+function generateQrDataUrl(text, width = 180) {
+  return new Promise((resolve, reject) => {
+    try {
+      const qr = ensureQrGenerator();
+      qr.toDataURL(
+        text,
+        {
+          width,
+          margin: 1,
+          errorCorrectionLevel: "M"
+        },
+        (error, url) => {
+          if (error || !url) {
+            reject(error || new Error("Unable to generate QR code."));
+            return;
+          }
+          resolve(url);
+        }
+      );
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+async function getQrDataUrl(url) {
+  const key = (url || "").toString();
+  if (state.qrDataUrlByUrl.has(key)) {
+    return state.qrDataUrlByUrl.get(key);
+  }
+  const dataUrl = await generateQrDataUrl(key);
+  state.qrDataUrlByUrl.set(key, dataUrl);
+  return dataUrl;
+}
+
+async function populateQrPreview(link, previewImage, previewStatus, downloadButton) {
+  try {
+    const dataUrl = await getQrDataUrl(link.url);
+    previewImage.src = dataUrl;
+    previewImage.classList.remove("hidden");
+    previewStatus.classList.add("hidden");
+    previewStatus.textContent = "";
+    downloadButton.disabled = false;
+  } catch (error) {
+    previewStatus.classList.remove("hidden");
+    previewStatus.textContent = "QR unavailable";
+    downloadButton.disabled = true;
+    if (!state.qrLoadErrorShown) {
+      state.qrLoadErrorShown = true;
+      setBanner("error", `Unable to generate QR images: ${error.message}`);
+    }
+  }
+}
+
+async function downloadQr(link, button) {
+  const originalText = button.textContent;
+  button.disabled = true;
+  button.textContent = "Preparing...";
+
+  try {
+    const dataUrl = await getQrDataUrl(link.url);
+    triggerDownload(dataUrl, qrFileName(link));
+    setBanner("success", `Downloaded QR image for ${safeText(link.serialNumber)}.`);
+  } catch (error) {
+    setBanner("error", `Unable to download QR image: ${error.message}`);
+  } finally {
+    button.textContent = originalText;
+    button.disabled = false;
+  }
+}
+
 async function fetchJson(url, options) {
   const response = await fetch(url, options);
   const payload = await response.json().catch(() => ({}));
@@ -45,7 +149,7 @@ function renderRows() {
 
   if (!state.links.length) {
     const row = document.createElement("tr");
-    row.innerHTML = '<td colspan="7">No equipment links were returned.</td>';
+    row.innerHTML = '<td colspan="8">No equipment links were returned.</td>';
     elements.linksBody.append(row);
     return;
   }
@@ -80,7 +184,23 @@ function renderRows() {
     urlCell.append(urlText);
     row.append(urlCell);
 
-    const copyCell = document.createElement("td");
+    const previewCell = document.createElement("td");
+    const previewImage = document.createElement("img");
+    previewImage.className = "qr-preview hidden";
+    previewImage.alt = `QR for ${safeText(link.serialNumber, link.equipmentId)}`;
+    previewImage.loading = "lazy";
+    previewImage.decoding = "async";
+    previewImage.width = 120;
+    previewImage.height = 120;
+    const previewStatus = document.createElement("div");
+    previewStatus.className = "qr-status";
+    previewStatus.textContent = "Generating...";
+    previewCell.append(previewImage, previewStatus);
+    row.append(previewCell);
+
+    const actionCell = document.createElement("td");
+    actionCell.className = "link-actions";
+
     const copyButton = document.createElement("button");
     copyButton.type = "button";
     copyButton.className = "button-secondary";
@@ -93,10 +213,21 @@ function renderRows() {
         setBanner("error", `Unable to copy URL: ${error.message}`);
       }
     });
-    copyCell.append(copyButton);
-    row.append(copyCell);
+
+    const downloadButton = document.createElement("button");
+    downloadButton.type = "button";
+    downloadButton.className = "button-secondary";
+    downloadButton.textContent = "Download QR";
+    downloadButton.disabled = true;
+    downloadButton.addEventListener("click", () => {
+      downloadQr(link, downloadButton);
+    });
+
+    actionCell.append(copyButton, downloadButton);
+    row.append(actionCell);
 
     elements.linksBody.append(row);
+    populateQrPreview(link, previewImage, previewStatus, downloadButton);
   }
 }
 
