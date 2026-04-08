@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Daily Equipment Check</title>
+    <link rel="stylesheet" href="./daily.css" />
+  </head>
+  <body>
+    <main class="daily-layout">
+      <header class="daily-hero">
+        <p class="hero-kicker">Inventory Safety Program</p>
+        <h1>Daily Equipment Check</h1>
+        <p class="hero-text">
+          Scan a QR code on the equipment to open this page directly with that unit pre-selected.
+        </p>
+      </header>
+
+      <section class="daily-panel">
+        <form id="dailyForm" novalidate>
+          <div id="banner" class="daily-banner hidden" role="status" aria-live="polite"></div>
+
+          <div class="equipment-card">
+            <h2>Equipment</h2>
+            <div class="equipment-grid">
+              <label>
+                <span>Serial Number</span>
+                <input id="serialNumber" type="text" readonly />
+              </label>
+              <label>
+                <span>Equipment ID</span>
+                <input id="equipmentId" type="text" readonly />
+              </label>
+              <label>
+                <span>Make</span>
+                <input id="make" type="text" readonly />
+              </label>
+              <label>
+                <span>Model</span>
+                <input id="modelNumber" type="text" readonly />
+              </label>
+              <label>
+                <span>Type</span>
+                <input id="type" type="text" readonly />
+              </label>
+              <label>
+                <span>Form Template</span>
+                <input id="templateName" type="text" readonly />
+              </label>
+            </div>
+          </div>
+
+          <div class="meta-card">
+            <h2>Check Details</h2>
+            <div class="meta-grid">
+              <label>
+                <span>Date</span>
+                <input id="checkDate" name="checkDate" type="date" required />
+              </label>
+              <label>
+                <span>Time</span>
+                <input id="checkTime" name="checkTime" type="time" required />
+              </label>
+              <label>
+                <span>Operator (Print Name)</span>
+                <input
+                  id="operatorName"
+                  name="operatorName"
+                  type="text"
+                  maxlength="120"
+                  required
+                  placeholder="Operator full name"
+                />
+              </label>
+              <label>
+                <span>Operator ID (Optional)</span>
+                <input
+                  id="operatorId"
+                  name="operatorId"
+                  type="text"
+                  maxlength="50"
+                  placeholder="Employee ID / Badge"
+                />
+              </label>
+            </div>
+          </div>
+
+          <section id="checklistContainer" class="checklist-stack">
+            <p class="placeholder-copy">Loading checklist...</p>
+          </section>
+
+          <label class="comments-block">
+            <span>General Comments (Optional)</span>
+            <textarea
+              id="generalComments"
+              name="generalComments"
+              rows="4"
+              maxlength="2000"
+              placeholder="Notes for supervisor, maintenance, or safety follow-up."
+            ></textarea>
+          </label>
+
+          <div class="action-row">
+            <a class="button-link" href="/daily-links">View All QR Links</a>
+            <button id="submitButton" type="submit" class="button-primary">
+              Submit Daily Check
+            </button>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <script type="module" src="./daily.js"></script>
+  </body>
+</html>

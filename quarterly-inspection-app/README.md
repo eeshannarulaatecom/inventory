@@ -1,11 +1,12 @@
-# Quarterly Inspection App (monday.com)
+# Equipment Inspection App (monday.com)
 
-Hosted quarterly inspection form that:
+Hosted inspection forms that:
 
 - Reads equipment details from your **Inventory** board.
-- Requires a **Pass/Fail** choice for every equipment row.
-- Allows optional comments per row.
-- Creates or updates rows in your **Quarterly Check Tracker** board.
+- Supports a **Quarterly** bulk check page.
+- Supports a **Daily** per-equipment checklist page (QR friendly).
+- Uses configurable pass/fail labels.
+- Saves results into monday.com boards.
 
 ## Requirements
 
@@ -25,11 +26,15 @@ npm install
 npm run dev
 ```
 
-Open: `http://localhost:3000`
+Open:
+
+- Quarterly page: `http://localhost:3000/`
+- Daily page (QR target): `http://localhost:3000/daily?serial=SERIAL_NUMBER`
+- Daily QR link list: `http://localhost:3000/daily-links`
 
 ## 2. Find Column IDs Quickly
 
-After setting token + board IDs, you can list columns:
+After setting token + board IDs, you can list board columns:
 
 - Inventory columns: `GET /api/boards/inventory/columns`
 - Quarterly columns: `GET /api/boards/quarterly/columns`
@@ -45,7 +50,7 @@ Inventory board must map:
 - Model Number
 - Type
 
-Quarterly board must map:
+Quarterly board should map:
 
 - Model Number
 - Check Date
@@ -55,7 +60,23 @@ Quarterly board must map:
 
 Serial Number is taken from the item name (first column) on both boards.
 
-## 4. Submission Behavior
+Daily board can map any of these (all optional, but useful):
+
+- Serial Number
+- Equipment ID
+- Make
+- Model Number
+- Type
+- Operator Name
+- Operator ID
+- Check Date
+- Check Time
+- Overall Result (status)
+- Failed Count
+- Checklist Details
+- General Comments
+
+## 4. Quarterly Submission Behavior
 
 On submit:
 
@@ -64,7 +85,29 @@ On submit:
 - If serial number exists in quarterly board, row is updated.
 - If serial number does not exist, row is created.
 
-## 5. Deployment
+## 5. Daily Check + QR Flow
+
+1. Put a QR code on each equipment item.
+2. The QR should point to:
+   - `https://your-domain/daily?serial=SERIAL_NUMBER`
+   - or `https://your-domain/daily?equipmentId=EQUIPMENT_ID`
+3. Operator scans code and fills the checklist.
+4. App creates a new row in the configured Daily board.
+
+Daily API endpoints:
+
+- `GET /api/daily/form?serial=...` (or `equipmentId=...`)
+- `POST /api/daily/submit`
+- `GET /api/daily/qr-links` (returns direct URLs for all inventory items)
+
+Daily checklist template defaults to the forklift visual + operational checklist from your paper form.
+You can customize per-equipment templates in:
+
+- `server/dailyFormTemplates.js`
+  - `TEMPLATE_OVERRIDES_BY_SERIAL`
+  - `TEMPLATE_OVERRIDES_BY_TYPE`
+
+## 6. Deployment
 
 ### Vercel
 

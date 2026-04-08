@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Daily Check QR Links</title>
+    <link rel="stylesheet" href="./daily.css" />
+  </head>
+  <body>
+    <main class="daily-layout">
+      <header class="daily-hero">
+        <p class="hero-kicker">Inventory Safety Program</p>
+        <h1>Daily Check QR Links</h1>
+        <p class="hero-text">
+          Use these URLs to generate one QR code per equipment item. Scanning a code opens the correct daily check form.
+        </p>
+      </header>
+
+      <section class="daily-panel links-panel">
+        <div id="banner" class="daily-banner hidden" role="status" aria-live="polite"></div>
+
+        <div class="action-row">
+          <a class="button-link" href="/daily">Open Daily Form</a>
+          <button id="copyCsvButton" type="button" class="button-secondary">
+            Copy Links as CSV
+          </button>
+        </div>
+
+        <div class="links-table-shell">
+          <table class="links-table">
+            <thead>
+              <tr>
+                <th>Serial Number</th>
+                <th>Equipment ID</th>
+                <th>Make</th>
+                <th>Model</th>
+                <th>Type</th>
+                <th>Direct URL</th>
+                <th>Copy</th>
+              </tr>
+            </thead>
+            <tbody id="linksBody">
+              <tr>
+                <td colspan="7">Loading QR links...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="./daily-links.js"></script>
+  </body>
+</html>

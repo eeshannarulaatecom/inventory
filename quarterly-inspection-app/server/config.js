@@ -22,6 +22,17 @@ function requireNumericId(name) {
   return value;
 }
 
+function optionalNumericId(name) {
+  const value = readEnv(name);
+  if (!value) {
+    return "";
+  }
+  if (!/^\d+$/.test(value)) {
+    throw new Error(`${name} must be a numeric monday.com board ID`);
+  }
+  return value;
+}
+
 function parsePositiveInt(value, fallback) {
   const parsed = Number.parseInt(value, 10);
   if (!Number.isFinite(parsed) || parsed <= 0) {
@@ -37,7 +48,9 @@ export const config = {
     apiToken: requireEnv("MONDAY_API_TOKEN"),
     inventoryBoardId: requireNumericId("MONDAY_INVENTORY_BOARD_ID"),
     quarterlyBoardId: requireNumericId("MONDAY_QUARTERLY_BOARD_ID"),
+    dailyBoardId: optionalNumericId("MONDAY_DAILY_BOARD_ID"),
     quarterlyGroupId: readEnv("MONDAY_QUARTERLY_GROUP_ID"),
+    dailyGroupId: readEnv("MONDAY_DAILY_GROUP_ID"),
     passLabel: readEnv("MONDAY_PASS_LABEL", "Pass"),
     failLabel: readEnv("MONDAY_FAIL_LABEL", "Fail"),
     quarterlyIntervalMonths: parsePositiveInt(
@@ -56,6 +69,21 @@ export const config = {
       passFail: readEnv("MONDAY_QUARTERLY_PASS_FAIL_COLUMN_ID"),
       comments: readEnv("MONDAY_QUARTERLY_COMMENTS_COLUMN_ID"),
       nextCheckDate: readEnv("MONDAY_QUARTERLY_NEXT_CHECK_DATE_COLUMN_ID")
+    },
+    dailyColumns: {
+      serialNumber: readEnv("MONDAY_DAILY_SERIAL_COLUMN_ID"),
+      equipmentId: readEnv("MONDAY_DAILY_EQUIPMENT_ID_COLUMN_ID"),
+      make: readEnv("MONDAY_DAILY_MAKE_COLUMN_ID"),
+      modelNumber: readEnv("MONDAY_DAILY_MODEL_COLUMN_ID"),
+      type: readEnv("MONDAY_DAILY_TYPE_COLUMN_ID"),
+      operatorName: readEnv("MONDAY_DAILY_OPERATOR_NAME_COLUMN_ID"),
+      operatorId: readEnv("MONDAY_DAILY_OPERATOR_ID_COLUMN_ID"),
+      checkDate: readEnv("MONDAY_DAILY_CHECK_DATE_COLUMN_ID"),
+      checkTime: readEnv("MONDAY_DAILY_CHECK_TIME_COLUMN_ID"),
+      overallResult: readEnv("MONDAY_DAILY_OVERALL_RESULT_COLUMN_ID"),
+      failedCount: readEnv("MONDAY_DAILY_FAILED_COUNT_COLUMN_ID"),
+      checklistDetails: readEnv("MONDAY_DAILY_CHECKLIST_DETAILS_COLUMN_ID"),
+      generalComments: readEnv("MONDAY_DAILY_GENERAL_COMMENTS_COLUMN_ID")
     }
   }
 };
@@ -72,4 +100,10 @@ export function getMissingInventoryColumns() {
 
 export function getMissingQuarterlyColumns() {
   return missingColumnKeys(config.monday.quarterlyColumns);
+}
+
+export function getProvidedDailyColumns() {
+  return Object.entries(config.monday.dailyColumns)
+    .filter(([, value]) => Boolean(value))
+    .map(([key]) => key);
 }

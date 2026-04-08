@@ -7,6 +7,11 @@ import morgan from "morgan";
 
 import { config } from "./config.js";
 import {
+  createDailyCheck,
+  getDailyFormForEquipment,
+  listDailyQrLinks
+} from "./dailyService.js";
+import {
   fetchBoardColumns,
   fetchInventoryEquipment,
   upsertQuarterlyChecks
@@ -32,6 +37,18 @@ function isValidDateString(value) {
     parsed.getUTCMonth() + 1 === month &&
     parsed.getUTCDate() === day
   );
+}
+
+function isValidTimeString(value) {
+  if (!/^\d{2}:\d{2}$/.test(value)) {
+    return false;
+  }
+
+  const [hourText, minuteText] = value.split(":");
+  const hour = Number.parseInt(hourText, 10);
+  const minute = Number.parseInt(minuteText, 10);
+
+  return hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59;
 }
 
 export function createApp() {
@@ -71,9 +88,13 @@ export function createApp() {
     try {
       const boardType = request.params.boardType;
 
-      if (boardType !== "inventory" && boardType !== "quarterly") {
+      if (
+        boardType !== "inventory" &&
+        boardType !== "quarterly" &&
+        boardType !== "daily"
+      ) {
         response.status(400).json({
-          message: "boardType must be inventory or quarterly"
+          message: "boardType must be inventory, quarterly, or daily"
         });
         return;
       }
@@ -81,7 +102,16 @@ export function createApp() {
       const boardId =
         boardType === "inventory"
           ? config.monday.inventoryBoardId
-          : config.monday.quarterlyBoardId;
+          : boardType === "quarterly"
+          ? config.monday.quarterlyBoardId
+          : config.monday.dailyBoardId;
+
+      if (!boardId) {
+        response.status(400).json({
+          message: "Daily board is not configured. Set MONDAY_DAILY_BOARD_ID."
+        });
+        return;
+      }
 
       const board = await fetchBoardColumns(boardId);
       response.json({ board });
@@ -131,6 +161,120 @@ export function createApp() {
     } catch (error) {
       next(error);
     }
+  });
+
+  app.get("/api/daily/form", async (request, response, next) => {
+    try {
+      const serialNumber = (request.query.serial || "").toString().trim();
+      const equipmentId = (request.query.equipmentId || "").toString().trim();
+
+      if (!serialNumber && !equipmentId) {
+        response.status(400).json({
+          message: "Provide serial or equipmentId query parameter."
+        });
+        return;
+      }
+
+      const payload = await getDailyFormForEquipment({
+        serialNumber,
+        equipmentId
+      });
+      response.json(payload);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/daily/qr-links", async (request, response, next) => {
+    try {
+      const forwardedProto = (request.headers["x-forwarded-proto"] || "")
+        .toString()
+        .split(",")[0]
+        .trim();
+      const protocol = forwardedProto || request.protocol;
+      const host = request.get("host");
+      const baseUrl = `${protocol}://${host}`;
+      const links = await listDailyQrLinks(baseUrl);
+      response.json({ links });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/daily/submit", async (request, response, next) => {
+    try {
+      const {
+        serialNumber,
+        equipmentId,
+        checkDate,
+        checkTime,
+        operatorName,
+        operatorId,
+        generalComments,
+        entries
+      } = request.body ?? {};
+
+      if (!serialNumber && !equipmentId) {
+        response.status(400).json({
+          message: "serialNumber or equipmentId is required."
+        });
+        return;
+      }
+
+      if (!isValidDateString(checkDate)) {
+        response.status(400).json({
+          message: "checkDate must be a valid date string (YYYY-MM-DD)."
+        });
+        return;
+      }
+
+      if (!isValidTimeString(checkTime)) {
+        response.status(400).json({
+          message: "checkTime must be a valid time string (HH:mm)."
+        });
+        return;
+      }
+
+      if (!(operatorName || "").toString().trim()) {
+        response.status(400).json({
+          message: "operatorName is required."
+        });
+        return;
+      }
+
+      if (!Array.isArray(entries) || entries.length === 0) {
+        response.status(400).json({
+          message: "entries must be a non-empty array."
+        });
+        return;
+      }
+
+      const result = await createDailyCheck({
+        serialNumber: (serialNumber || "").toString().trim(),
+        equipmentId: (equipmentId || "").toString().trim(),
+        checkDate: checkDate.toString().trim(),
+        checkTime: checkTime.toString().trim(),
+        operatorName: operatorName.toString().trim(),
+        operatorId: (operatorId || "").toString().trim(),
+        generalComments: (generalComments || "").toString().trim(),
+        entries
+      });
+
+      response.json({
+        message: "Daily check saved successfully.",
+        ...result
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/daily", (_request, response) => {
+    response.sendFile(path.join(clientDirectory, "daily.html"));
+  });
+
+  app.get("/daily-links", (_request, response) => {
+    response.sendFile(path.join(clientDirectory, "daily-links.html"));
   });
 
   app.get("*", (_request, response) => {
