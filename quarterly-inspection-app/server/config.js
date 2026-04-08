@@ -41,6 +41,15 @@ function parsePositiveInt(value, fallback) {
   return parsed;
 }
 
+function normalizeCheckIdForEnv(checkId) {
+  return (checkId || "")
+    .toString()
+    .trim()
+    .replace(/[^a-zA-Z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .toUpperCase();
+}
+
 export const config = {
   port: parsePositiveInt(readEnv("PORT"), 3000),
   monday: {
@@ -106,4 +115,20 @@ export function getProvidedDailyColumns() {
   return Object.entries(config.monday.dailyColumns)
     .filter(([, value]) => Boolean(value))
     .map(([key]) => key);
+}
+
+export function getDailyCheckResultColumnEnvName(checkId) {
+  const normalized = normalizeCheckIdForEnv(checkId);
+  if (!normalized) {
+    return "";
+  }
+  return `MONDAY_DAILY_CHECK_${normalized}_COLUMN_ID`;
+}
+
+export function getDailyCheckResultColumnId(checkId) {
+  const envName = getDailyCheckResultColumnEnvName(checkId);
+  if (!envName) {
+    return "";
+  }
+  return readEnv(envName);
 }

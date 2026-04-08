@@ -76,6 +76,15 @@ Daily board can map any of these (all optional, but useful):
 - Checklist Details
 - General Comments
 
+For per-item Pass/Fail tracking, add one **Status** column per checklist item and map
+its monday column ID in `.env` using:
+
+- `MONDAY_DAILY_CHECK_<CHECK_ID_IN_UPPER_SNAKE_CASE>_COLUMN_ID`
+
+The complete set for the default forklift checklist is included in `.env.example`.
+Each of those Status columns should support your configured pass/fail labels
+(`MONDAY_PASS_LABEL`, `MONDAY_FAIL_LABEL`).
+
 ## 4. Quarterly Submission Behavior
 
 On submit:

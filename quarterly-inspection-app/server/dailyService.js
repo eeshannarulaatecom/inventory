@@ -1,4 +1,8 @@
-import { config } from "./config.js";
+import {
+  config,
+  getDailyCheckResultColumnEnvName,
+  getDailyCheckResultColumnId
+} from "./config.js";
 import { mondayRequest } from "./mondayClient.js";
 import { fetchInventoryEquipment } from "./quarterlyService.js";
 import {
@@ -154,6 +158,38 @@ function buildDailyColumnValues({
   setColumnIfPresent(values, dailyColumns.generalComments, generalComments);
 
   return values;
+}
+
+function buildChecklistResultColumnValues(checklistItems, entryMap) {
+  const values = {};
+  const missingMappings = [];
+  const items = Array.isArray(checklistItems) ? checklistItems : [];
+
+  for (const item of items) {
+    const checkId = textValueOrEmpty(item?.id);
+    if (!checkId) {
+      continue;
+    }
+
+    const envName = getDailyCheckResultColumnEnvName(checkId);
+    const columnId = getDailyCheckResultColumnId(checkId);
+    if (!columnId) {
+      missingMappings.push({
+        label: textValueOrEmpty(item?.label) || checkId,
+        envName: envName || "(invalid check id)"
+      });
+      continue;
+    }
+
+    const result = textValueOrEmpty(entryMap.get(checkId)?.result);
+    if (!result) {
+      continue;
+    }
+
+    values[columnId] = { label: result };
+  }
+
+  return { values, missingMappings };
 }
 
 function ensureDailyBoardConfigured() {
@@ -359,6 +395,19 @@ export async function createDailyCheck({
     );
   }
 
+  const checklistResultColumns = buildChecklistResultColumnValues(
+    form.checklistItems,
+    entryMap
+  );
+  if (checklistResultColumns.missingMappings.length) {
+    const details = checklistResultColumns.missingMappings
+      .map((item) => `${item.envName} (${item.label})`)
+      .join(", ");
+    throw new Error(
+      `Missing daily checklist result column IDs in .env: ${details}`
+    );
+  }
+
   const failedCount = Array.from(entryMap.values()).filter(
     (entry) => entry.result === config.monday.failLabel
   ).length;
@@ -369,19 +418,20 @@ export async function createDailyCheck({
   const safeOperatorId = textValueOrEmpty(operatorId);
   const safeGeneralComments = textValueOrEmpty(generalComments);
 
-  const columnValues = JSON.stringify(
-    buildDailyColumnValues({
-      equipment: form.equipment,
-      checkDate,
-      checkTime,
-      operatorName: safeOperatorName,
-      operatorId: safeOperatorId,
-      overallResult,
-      failedCount,
-      checklistSummary,
-      generalComments: safeGeneralComments
-    })
-  );
+  const columnValuePayload = buildDailyColumnValues({
+    equipment: form.equipment,
+    checkDate,
+    checkTime,
+    operatorName: safeOperatorName,
+    operatorId: safeOperatorId,
+    overallResult,
+    failedCount,
+    checklistSummary,
+    generalComments: safeGeneralComments
+  });
+  Object.assign(columnValuePayload, checklistResultColumns.values);
+
+  const columnValues = JSON.stringify(columnValuePayload);
 
   const itemName = buildDailyItemName(form.equipment, checkDate, checkTime);
   const itemId = await createDailyItem(itemName, columnValues);
