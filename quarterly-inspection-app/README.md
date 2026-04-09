@@ -5,6 +5,7 @@ Hosted inspection forms that:
 - Reads equipment details from your **Inventory** board.
 - Supports a **Quarterly** bulk check page.
 - Supports a **Daily** per-equipment checklist page (QR friendly).
+- Supports an **Annual** checklist page with equipment dropdown selection.
 - Uses configurable pass/fail labels.
 - Saves results into monday.com boards.
 
@@ -31,6 +32,7 @@ Open:
 - Quarterly page: `http://localhost:3000/`
 - Daily page (QR target): `http://localhost:3000/daily?serial=SERIAL_NUMBER`
 - Daily QR link list: `http://localhost:3000/daily-links`
+- Annual page (equipment dropdown): `http://localhost:3000/annual`
 
 ## 2. Find Column IDs Quickly
 
@@ -38,6 +40,8 @@ After setting token + board IDs, you can list board columns:
 
 - Inventory columns: `GET /api/boards/inventory/columns`
 - Quarterly columns: `GET /api/boards/quarterly/columns`
+- Daily columns: `GET /api/boards/daily/columns`
+- Annual columns: `GET /api/boards/annual/columns`
 
 Use the returned `id` values to fill the `.env` column variables.
 
@@ -85,6 +89,14 @@ The complete set for the default forklift checklist is included in `.env.example
 Each of those Status columns should support your configured pass/fail labels
 (`MONDAY_PASS_LABEL`, `MONDAY_FAIL_LABEL`).
 
+Annual board can map the same field set as Daily (Serial, Equipment ID, Make, Model,
+Type, Operator, Date/Time, Overall Result, Failed Count, Checklist Details, Comments)
+using `MONDAY_ANNUAL_*` variables from `.env.example`.
+
+For per-item Pass/Fail tracking on annual checks, map annual status columns using:
+
+- `MONDAY_ANNUAL_CHECK_<CHECK_ID_IN_UPPER_SNAKE_CASE>_COLUMN_ID`
+
 ## 4. Quarterly Submission Behavior
 
 On submit:
@@ -108,6 +120,11 @@ Daily API endpoints:
 - `GET /api/daily/form?serial=...` (or `equipmentId=...`)
 - `POST /api/daily/submit`
 - `GET /api/daily/qr-links` (returns direct URLs for all inventory items)
+
+Annual API endpoints:
+
+- `GET /api/annual/form?equipmentId=...` (or `serial=...`)
+- `POST /api/annual/submit`
 
 Daily checklist template defaults to the forklift visual + operational checklist from your paper form.
 You can customize per-equipment templates in:

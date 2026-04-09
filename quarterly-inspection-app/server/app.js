@@ -5,6 +5,7 @@ import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
 
+import { createAnnualCheck, getAnnualFormForEquipment } from "./annualService.js";
 import { config } from "./config.js";
 import {
   createDailyCheck,
@@ -91,24 +92,27 @@ export function createApp() {
       if (
         boardType !== "inventory" &&
         boardType !== "quarterly" &&
-        boardType !== "daily"
+        boardType !== "daily" &&
+        boardType !== "annual"
       ) {
         response.status(400).json({
-          message: "boardType must be inventory, quarterly, or daily"
+          message: "boardType must be inventory, quarterly, daily, or annual"
         });
         return;
       }
 
-      const boardId =
-        boardType === "inventory"
-          ? config.monday.inventoryBoardId
-          : boardType === "quarterly"
-          ? config.monday.quarterlyBoardId
-          : config.monday.dailyBoardId;
+      const boardIdByType = {
+        inventory: config.monday.inventoryBoardId,
+        quarterly: config.monday.quarterlyBoardId,
+        daily: config.monday.dailyBoardId,
+        annual: config.monday.annualBoardId
+      };
+      const boardId = boardIdByType[boardType];
 
       if (!boardId) {
+        const label = boardType[0].toUpperCase() + boardType.slice(1);
         response.status(400).json({
-          message: "Daily board is not configured. Set MONDAY_DAILY_BOARD_ID."
+          message: `${label} board is not configured. Set MONDAY_${boardType.toUpperCase()}_BOARD_ID.`
         });
         return;
       }
@@ -269,8 +273,102 @@ export function createApp() {
     }
   });
 
+  app.get("/api/annual/form", async (request, response, next) => {
+    try {
+      const serialNumber = (request.query.serial || "").toString().trim();
+      const equipmentId = (request.query.equipmentId || "").toString().trim();
+
+      if (!serialNumber && !equipmentId) {
+        response.status(400).json({
+          message: "Provide equipmentId (preferred) or serial query parameter."
+        });
+        return;
+      }
+
+      const payload = await getAnnualFormForEquipment({
+        serialNumber,
+        equipmentId
+      });
+      response.json(payload);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/annual/submit", async (request, response, next) => {
+    try {
+      const {
+        serialNumber,
+        equipmentId,
+        checkDate,
+        checkTime,
+        operatorName,
+        operatorId,
+        generalComments,
+        entries
+      } = request.body ?? {};
+
+      if (!serialNumber && !equipmentId) {
+        response.status(400).json({
+          message: "serialNumber or equipmentId is required."
+        });
+        return;
+      }
+
+      if (!isValidDateString(checkDate)) {
+        response.status(400).json({
+          message: "checkDate must be a valid date string (YYYY-MM-DD)."
+        });
+        return;
+      }
+
+      if (!isValidTimeString(checkTime)) {
+        response.status(400).json({
+          message: "checkTime must be a valid time string (HH:mm)."
+        });
+        return;
+      }
+
+      if (!(operatorName || "").toString().trim()) {
+        response.status(400).json({
+          message: "operatorName is required."
+        });
+        return;
+      }
+
+      if (!Array.isArray(entries) || entries.length === 0) {
+        response.status(400).json({
+          message: "entries must be a non-empty array."
+        });
+        return;
+      }
+
+      const result = await createAnnualCheck({
+        serialNumber: (serialNumber || "").toString().trim(),
+        equipmentId: (equipmentId || "").toString().trim(),
+        checkDate: checkDate.toString().trim(),
+        checkTime: checkTime.toString().trim(),
+        operatorName: operatorName.toString().trim(),
+        operatorId: (operatorId || "").toString().trim(),
+        generalComments: (generalComments || "").toString().trim(),
+        entries
+      });
+
+      response.json({
+        message: "Annual check saved successfully.",
+        ...result
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
   app.get("/daily", (_request, response) => {
     response.sendFile(path.join(clientDirectory, "daily.html"));
+  });
+
+  app.get("/annual", (_request, response) => {
+    response.sendFile(path.join(clientDirectory, "annual.html"));
   });
 
   app.get("/daily-links", (_request, response) => {

@@ -3,26 +3,32 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Daily Equipment Check</title>
+    <title>Annual Equipment Check</title>
     <link rel="stylesheet" href="./daily.css" />
   </head>
   <body>
     <main class="daily-layout">
       <header class="daily-hero">
         <p class="hero-kicker">Inventory Safety Program</p>
-        <h1>Daily Equipment Check</h1>
+        <h1>Annual Equipment Check</h1>
         <p class="hero-text">
-          Scan a QR code on the equipment to open this page directly with that unit pre-selected.
+          Select equipment from the list, complete the annual checklist, and submit to monday.com.
         </p>
       </header>
 
       <section class="daily-panel">
-        <form id="dailyForm" novalidate>
+        <form id="annualForm" novalidate>
           <div id="banner" class="daily-banner hidden" role="status" aria-live="polite"></div>
 
           <div class="equipment-card">
             <h2>Equipment</h2>
             <div class="equipment-grid">
+              <label class="equipment-select-field">
+                <span>Equipment</span>
+                <select id="equipmentSelect" required>
+                  <option value="">Select equipment</option>
+                </select>
+              </label>
               <label>
                 <span>Serial Number</span>
                 <input id="serialNumber" type="text" readonly />
@@ -86,7 +92,7 @@
           </div>
 
           <section id="checklistContainer" class="checklist-stack">
-            <p class="placeholder-copy">Loading checklist...</p>
+            <p class="placeholder-copy">Select equipment to load checklist...</p>
           </section>
 
           <label class="comments-block">
@@ -101,16 +107,15 @@
           </label>
 
           <div class="action-row">
-            <a class="button-link" href="/daily-links">View All QR Links</a>
-            <a class="button-link" href="/annual">Open Annual Form</a>
+            <a class="button-link" href="/daily">Open Daily Form</a>
             <button id="submitButton" type="submit" class="button-primary">
-              Submit Daily Check
+              Submit Annual Check
             </button>
           </div>
         </form>
       </section>
     </main>
 
-    <script type="module" src="./daily.js"></script>
+    <script type="module" src="./annual.js"></script>
   </body>
 </html>

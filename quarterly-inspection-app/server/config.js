@@ -50,6 +50,14 @@ function normalizeCheckIdForEnv(checkId) {
     .toUpperCase();
 }
 
+function getCheckResultColumnEnvName(scope, checkId) {
+  const normalized = normalizeCheckIdForEnv(checkId);
+  if (!normalized) {
+    return "";
+  }
+  return `MONDAY_${scope}_CHECK_${normalized}_COLUMN_ID`;
+}
+
 export const config = {
   port: parsePositiveInt(readEnv("PORT"), 3000),
   monday: {
@@ -58,8 +66,10 @@ export const config = {
     inventoryBoardId: requireNumericId("MONDAY_INVENTORY_BOARD_ID"),
     quarterlyBoardId: requireNumericId("MONDAY_QUARTERLY_BOARD_ID"),
     dailyBoardId: optionalNumericId("MONDAY_DAILY_BOARD_ID"),
+    annualBoardId: optionalNumericId("MONDAY_ANNUAL_BOARD_ID"),
     quarterlyGroupId: readEnv("MONDAY_QUARTERLY_GROUP_ID"),
     dailyGroupId: readEnv("MONDAY_DAILY_GROUP_ID"),
+    annualGroupId: readEnv("MONDAY_ANNUAL_GROUP_ID"),
     passLabel: readEnv("MONDAY_PASS_LABEL", "Pass"),
     failLabel: readEnv("MONDAY_FAIL_LABEL", "Fail"),
     quarterlyIntervalMonths: parsePositiveInt(
@@ -93,6 +103,21 @@ export const config = {
       failedCount: readEnv("MONDAY_DAILY_FAILED_COUNT_COLUMN_ID"),
       checklistDetails: readEnv("MONDAY_DAILY_CHECKLIST_DETAILS_COLUMN_ID"),
       generalComments: readEnv("MONDAY_DAILY_GENERAL_COMMENTS_COLUMN_ID")
+    },
+    annualColumns: {
+      serialNumber: readEnv("MONDAY_ANNUAL_SERIAL_COLUMN_ID"),
+      equipmentId: readEnv("MONDAY_ANNUAL_EQUIPMENT_ID_COLUMN_ID"),
+      make: readEnv("MONDAY_ANNUAL_MAKE_COLUMN_ID"),
+      modelNumber: readEnv("MONDAY_ANNUAL_MODEL_COLUMN_ID"),
+      type: readEnv("MONDAY_ANNUAL_TYPE_COLUMN_ID"),
+      operatorName: readEnv("MONDAY_ANNUAL_OPERATOR_NAME_COLUMN_ID"),
+      operatorId: readEnv("MONDAY_ANNUAL_OPERATOR_ID_COLUMN_ID"),
+      checkDate: readEnv("MONDAY_ANNUAL_CHECK_DATE_COLUMN_ID"),
+      checkTime: readEnv("MONDAY_ANNUAL_CHECK_TIME_COLUMN_ID"),
+      overallResult: readEnv("MONDAY_ANNUAL_OVERALL_RESULT_COLUMN_ID"),
+      failedCount: readEnv("MONDAY_ANNUAL_FAILED_COUNT_COLUMN_ID"),
+      checklistDetails: readEnv("MONDAY_ANNUAL_CHECKLIST_DETAILS_COLUMN_ID"),
+      generalComments: readEnv("MONDAY_ANNUAL_GENERAL_COMMENTS_COLUMN_ID")
     }
   }
 };
@@ -117,16 +142,30 @@ export function getProvidedDailyColumns() {
     .map(([key]) => key);
 }
 
+export function getProvidedAnnualColumns() {
+  return Object.entries(config.monday.annualColumns)
+    .filter(([, value]) => Boolean(value))
+    .map(([key]) => key);
+}
+
 export function getDailyCheckResultColumnEnvName(checkId) {
-  const normalized = normalizeCheckIdForEnv(checkId);
-  if (!normalized) {
-    return "";
-  }
-  return `MONDAY_DAILY_CHECK_${normalized}_COLUMN_ID`;
+  return getCheckResultColumnEnvName("DAILY", checkId);
 }
 
 export function getDailyCheckResultColumnId(checkId) {
   const envName = getDailyCheckResultColumnEnvName(checkId);
+  if (!envName) {
+    return "";
+  }
+  return readEnv(envName);
+}
+
+export function getAnnualCheckResultColumnEnvName(checkId) {
+  return getCheckResultColumnEnvName("ANNUAL", checkId);
+}
+
+export function getAnnualCheckResultColumnId(checkId) {
+  const envName = getAnnualCheckResultColumnEnvName(checkId);
   if (!envName) {
     return "";
   }

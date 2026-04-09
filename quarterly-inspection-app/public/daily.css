@@ -137,6 +137,7 @@ label > span {
 }
 
 input,
+select,
 textarea {
   border: 1px solid #cfdbe5;
   border-radius: 10px;
@@ -152,9 +153,14 @@ input[readonly] {
 }
 
 input:focus,
+select:focus,
 textarea:focus {
   outline: 2px solid #328cc666;
   border-color: #2472a8;
+}
+
+.equipment-select-field {
+  grid-column: 1 / -1;
 }
 
 .checklist-stack {
