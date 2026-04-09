@@ -1,6 +1,7 @@
 const elements = {
   form: document.querySelector("#dailyForm"),
   banner: document.querySelector("#banner"),
+  bannerBottom: document.querySelector("#bannerBottom"),
   serialNumber: document.querySelector("#serialNumber"),
   equipmentId: document.querySelector("#equipmentId"),
   make: document.querySelector("#make"),
@@ -62,11 +63,27 @@ function setBanner(type, message) {
   );
   elements.banner.classList.add(`banner-${type}`);
   elements.banner.textContent = message;
+
+  if (type === "success" || type === "error") {
+    elements.bannerBottom.classList.remove(
+      "hidden",
+      "banner-info",
+      "banner-success",
+      "banner-error"
+    );
+    elements.bannerBottom.classList.add(`banner-${type}`);
+    elements.bannerBottom.textContent = message;
+  } else {
+    elements.bannerBottom.classList.add("hidden");
+    elements.bannerBottom.textContent = "";
+  }
 }
 
 function clearBanner() {
   elements.banner.classList.add("hidden");
   elements.banner.textContent = "";
+  elements.bannerBottom.classList.add("hidden");
+  elements.bannerBottom.textContent = "";
 }
 
 function setBusyState() {

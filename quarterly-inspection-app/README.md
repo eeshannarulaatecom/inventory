@@ -126,6 +126,31 @@ Annual API endpoints:
 - `GET /api/annual/form?equipmentId=...` (or `serial=...`)
 - `POST /api/annual/submit`
 
+## 6. Annual Board Auto-Setup
+
+If monday AI does not create the annual board structure correctly, run:
+
+```bash
+npm run setup:annual-board
+```
+
+This script will:
+
+- Create groups:
+  - `Annual Checks - Open`
+  - `Annual Checks - Completed`
+- Create all annual metadata + checklist status columns (if missing)
+- Print `MONDAY_ANNUAL_*` env assignments you can paste into `.env`
+
+Important:
+
+- monday columns are board-level (shared across all groups). Groups do not have separate columns.
+- Before running the script, set at least:
+  - `MONDAY_API_TOKEN`
+  - `MONDAY_ANNUAL_BOARD_ID`
+
+## 7. Checklist Templates
+
 Daily checklist template defaults to the forklift visual + operational checklist from your paper form.
 You can customize per-equipment templates in:
 
@@ -133,7 +158,7 @@ You can customize per-equipment templates in:
   - `TEMPLATE_OVERRIDES_BY_SERIAL`
   - `TEMPLATE_OVERRIDES_BY_TYPE`
 
-## 6. Deployment
+## 8. Deployment
 
 ### Vercel
 

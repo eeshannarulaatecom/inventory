@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "node --watch server/index.js",
-    "start": "node server/index.js"
+    "start": "node server/index.js",
+    "setup:annual-board": "node scripts/setupAnnualBoard.js"
   },
   "dependencies": {
     "dotenv": "^16.5.0",

@@ -75,6 +75,11 @@ body {
   font-weight: 600;
 }
 
+.bottom-banner {
+  margin-top: 12px;
+  margin-bottom: 0;
+}
+
 .banner-info {
   color: var(--info);
   background: #ecf5ff;
